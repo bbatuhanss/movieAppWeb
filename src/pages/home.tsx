@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { fetchData } from "../api/api";
 import MovieCard from "../components/card";
+import tmdbApi,{ category, movieType, } from '../api/tmdbApi';
 
 const home = () => {
   const [movies, setMovies] = useState([]); 
@@ -12,9 +13,23 @@ const home = () => {
   }, []);
 
   const particlesLoaded = async (value) => {
+    let response = {};
+    const params = {page: 1}
     try {
-      const response = await fetchData(value);
-      setMovies(response.Search); 
+      response = await tmdbApi.getMoviesList(movieType.popular, {params});
+      setMovies(response["results"]);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const search = async (value) => {
+    let response = {};
+    const params = {
+      query: value,
+    };
+    try {
+      response = await tmdbApi.search(category.movie, {params});
+      setMovies(response["results"]);
     } catch (error) {
       console.error(error);
     }
@@ -31,7 +46,7 @@ const home = () => {
         <img
           src="https://media.geeksforgeeks.org/wp-content/uploads/20230626112934/search.png"
           alt="search icon"
-          onClick={() => particlesLoaded(searchTerm)}
+          onClick={() => search(searchTerm)}
         />
       </div>
       {movies?.length > 0 ? (
